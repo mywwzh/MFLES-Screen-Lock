@@ -1,5 +1,13 @@
 # MFLES_screenlocker
 
+## devlog
+
+**dev snapshot 2024-04-04-21-15**: 
+
+- 增加device uuid，并在请求是否锁屏是附加在参数中
+- 现在解锁码不会被直接展示，会先由服务器验证用户后进行展示。
+
+## 简介
 这是一个使用Python的Tkinter库创建的锁屏应用程序。
 
 ## 背景
