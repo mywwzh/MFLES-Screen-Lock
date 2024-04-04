@@ -30,12 +30,6 @@ def check_lock():
                 if jsons['code'] == '200':
                     if jsons['status'] == 'False':
                         sys.exit()
-                    else:
-                        pass
-                else:
-                    pass
-            else:
-                pass
         except:
             pass
         time.sleep(10)
