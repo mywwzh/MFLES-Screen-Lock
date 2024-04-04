@@ -36,8 +36,8 @@ def set_always_on_top(root):
     """
     窗口强制置顶
     """
-    root.attributes("-topmost", True)
-    ctypes.windll.user32.SetWindowPos(root.winfo_id(), -1, 0, 0, 0, 0, 0x0001)
+    # root.attributes("-topmost", True)
+    # ctypes.windll.user32.SetWindowPos(root.winfo_id(), -1, 0, 0, 0, 0, 0x0001)
 
 
 def ignore_close_windows():
@@ -69,7 +69,11 @@ class LockScreenApp:
         # 创建一个二维码标签，显示二维码图片
         self.qr_code_label = tk.Label(master, image=self.qr_code_photo)
         self.qr_code_label.place(x=200, y=master.winfo_screenheight() // 3)
-
+        self.copyright_label = tk.Label(
+            master, text="MFLES screen locker v1.0.0\n 开源项目, 遵循MIT开源协议\nhttps://github.com/mywwzh/MFLES_screenlocker/\nCopyright (C) 2024 刘子涵 保留所有权利",
+            font=("SimHei", 12), bg="lightblue")
+        self.copyright_label.place(
+            x=master.winfo_screenwidth() - 400, y=master.winfo_screenheight() - 80)
         # 初始化解锁码为空字符串
         self.password = ""
         # 创建一个密码标签，显示请输入解锁码
