@@ -6,27 +6,39 @@ import sys
 import ctypes
 import requests as r
 import threading
+import uuid
+import json
+import base64
+import time
+
+machine_uuid = str(uuid.UUID(int = uuid.getnode()))
 
 def check_lock():
     """
     检查是否需要锁屏
     """
-    
-    global Lock
-    url = "https://api.mfles.cn/screenlocker/check"
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Apple-WebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-    }
-    try:
-        response = r.get(url, headers=headers)
-        if response.status_code == 200:
-            txt = response.text
-            if txt == "False":
-                sys.exit()
-        else:
+    while True:
+        url = "https://api.mfles.cn/screenlocker/check?machine_uuid={0}".format(machine_uuid)
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Apple-WebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        # response format: {"code":"200/-1", status:"True/False"}
+        try:
+            response = r.get(url, headers=headers)
+            if response.status_code == 200:
+                jsons = json.loads(response.json)
+                if jsons['code'] == '200':
+                    if jsons['status'] == 'False':
+                        sys.exit()
+                    else:
+                        pass
+                else:
+                    pass
+            else:
+                pass
+        except:
             pass
-    except:
-        pass
+        time.sleep(10)
 
 
 random_password = ''.join(random.choices('0123456789', k=6)) # 生成6位随机验证码
@@ -131,13 +143,14 @@ class LockScreenApp:
     def generate_qr_code(self):
         # 生成好的随机密码
         global random_password
+        url = "https://api.mfles.cn/screenlocker/verify?password={0}".format(str(base64.urlsafe_b64encode(random_password)[2:-1]))
         qr = qrcode.QRCode(
             version=3,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
             box_size=10,
             border=4,
         )
-        qr.add_data(random_password)
+        qr.add_data(url)
         qr.make(fit=True)
 
         # 生成二维码图片
