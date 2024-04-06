@@ -76,7 +76,7 @@ class LockScreenApp:
         self.qr_code_label = tk.Label(master, image=self.qr_code_photo)
         self.qr_code_label.place(x=200, y=master.winfo_screenheight() // 3)
         self.copyright_label = tk.Label(
-            master, text="MFLES screen locker v1.0.1\n 开源项目, 遵循MIT开源协议\nhttps://github.com/mywwzh/MFLES_screenlocker/\nCopyright (C) 2024 刘子涵 保留所有权利",
+            master, text="MFLES Screen Locker v1.0.1\n 开源项目, 遵循MIT开源协议\nhttps://github.com/mywwzh/MFLES_screenlocker/\nCopyright (C) 2024 刘子涵 保留所有权利",
             font=("SimHei", 12), bg="lightblue")
         self.copyright_label.place(
             x=master.winfo_screenwidth() - 400, y=master.winfo_screenheight() - 80)
@@ -114,7 +114,7 @@ class LockScreenApp:
             # 显示按钮画布
             canvas.grid(row=row, column=column, padx=10, pady=30)
             # 创建按钮背景
-            canvas.create_rectangle(0, 0, 100, 50, fill="lightblue")
+            canvas.create_rectangle(0, 0, 100, 50, fill="lightblue", outline="black", width=2)
             # 创建按钮文本
             canvas.create_text(50, 25, text=text, font=("SimHei", 12))
             # 绑定按钮点击事件
@@ -127,7 +127,7 @@ class LockScreenApp:
         # 显示清空按钮画布
         clear_button_canvas.grid(row=3, column=2, padx=5, pady=5)
         # 创建清空按钮背景
-        clear_button_canvas.create_rectangle(0, 0, 100, 50, fill="lightblue")
+        clear_button_canvas.create_rectangle(0, 0, 100, 50, fill="lightblue", outline="black", width=2)
         # 创建清空按钮文本
         clear_button_canvas.create_text(50, 25, text="清空", font=("SimHei", 12))
         # 绑定清空按钮点击事件
@@ -137,7 +137,7 @@ class LockScreenApp:
     def generate_qr_code(self):
         # 生成好的随机密码
         global random_password
-        url = "https://api.mfles.cn/screenlocker/verify?password={0}".format(str(base64.urlsafe_b64encode(random_password)[2:-1]))
+        url = "https://api.mfles.cn/screenlocker/verify?password={0}".format(str(base64.urlsafe_b64encode(random_password.encode())[2:-1]))
         qr = qrcode.QRCode(
             version=3,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
