@@ -10,15 +10,21 @@ import uuid
 import json
 import base64
 import time
+import os
+import subprocess
 
 machine_uuid = str(uuid.UUID(int = uuid.getnode()))
+random_password = ''.join(random.choices('0123456789', k=6)) # 生成6位随机验证码
+f = open('config.ini', 'r', encoding='utf-8')
+addr = f.readline().strip() # 读取配置的门牌号
+f.close()
 
 def check_lock():
     """
     检查是否需要锁屏
     """
     while True:
-        url = "https://api.mfles.cn/screenlocker/check?machine_uuid={0}".format(machine_uuid)
+        url = "https://api.mfles.cn/screenlock/check?machine_uuid={0}&addr={1}".format(machine_uuid, addr)
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Apple-WebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         }
@@ -29,14 +35,11 @@ def check_lock():
                 jsons = json.loads(response.json)
                 if jsons['code'] == '200':
                     if jsons['status'] == 'False':
+                        subprocess.Popen('C:\\Windows\\explorer.exe') # 恢复explorer
                         sys.exit()
         except:
             pass
         time.sleep(10)
-
-
-random_password = ''.join(random.choices('0123456789', k=6)) # 生成6位随机验证码
-
 
 def set_always_on_top(root):
     """
@@ -76,7 +79,7 @@ class LockScreenApp:
         self.qr_code_label = tk.Label(master, image=self.qr_code_photo)
         self.qr_code_label.place(x=200, y=master.winfo_screenheight() // 3)
         self.copyright_label = tk.Label(
-            master, text="MFLES Screen Locker v1.0.1\n 开源项目, 遵循MIT开源协议\nhttps://github.com/mywwzh/MFLES_screenlocker/\nCopyright (C) 2024 刘子涵 保留所有权利",
+            master, text="MFLES Screen Lock v1.0.2\n 内部测试版\n 当前教室: {0}\nCopyright (C) 2024 刘子涵 保留所有权利".format(addr),
             font=("SimHei", 12), bg="lightblue")
         self.copyright_label.place(
             x=master.winfo_screenwidth() - 400, y=master.winfo_screenheight() - 80)
@@ -84,7 +87,7 @@ class LockScreenApp:
         self.password = ""
         # 创建一个密码标签，显示请输入解锁码
         self.password_label = tk.Label(
-            master, text="请输入解锁码: ", font=("SimHei", 24), bg="lightblue")
+            master, text="请输入解锁码: ", font=("SimHei", 24), bg="lightblue", fg="black")
         self.password_label.place(x=master.winfo_screenwidth()//5*3, y=200)
 
         # 创建一个键盘框架
@@ -137,14 +140,14 @@ class LockScreenApp:
     def generate_qr_code(self):
         # 生成好的随机密码
         global random_password
-        url = "https://api.mfles.cn/screenlocker/verify?password={0}".format(str(base64.urlsafe_b64encode(random_password.encode())[2:-1]))
+        # url = "https://api.mfles.cn/screenlock/verify?password={0}&machine_uuid={1}&addr={2}".format(str(base64.urlsafe_b64encode(random_password.encode())[2:-1]), machine_uuid, addr)
         qr = qrcode.QRCode(
             version=3,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
             box_size=10,
             border=4,
         )
-        qr.add_data(url)
+        qr.add_data(random_password)
         qr.make(fit=True)
 
         # 生成二维码图片
@@ -155,24 +158,25 @@ class LockScreenApp:
         # 添加字符到密码中
         self.password += char
         self.password_label.config(
-            text="请输入解锁码: " + "*" * len(self.password), bg="lightblue")
+            text="请输入解锁码: " + "*" * len(self.password), bg="lightblue", fg="black")
         if len(self.password) == 6:
             self.check_password()
 
     def clear_password(self):
         # 清空密码
         self.password = ""
-        self.password_label.config(text="请输入解锁码: ", bg="lightblue")
+        self.password_label.config(text="请输入解锁码: ", bg="lightblue", fg="black")
 
     def check_password(self):
         # 检查解锁码
         global random_password
         if self.password == random_password or self.password == "103005":
+            subprocess.Popen('C:\\Windows\\explorer.exe') # 恢复explorer
             sys.exit()
         else:
             # 解锁码错误，清空密码
             self.password = ""
-            self.password_label.config(text="请输入解锁码: ", bg="lightblue")
+            self.password_label.config(text="解锁码错误!请重新输入!", bg="lightblue", fg="red")
 
 
 def main():
@@ -183,6 +187,11 @@ def main():
     root.mainloop()
 
 if __name__ == "__main__":
+    try:
+        os.system("taskkill /f /im explorer.exe") # 先杀死explorer，防止卡出开始菜单和任务栏
+    except:
+        pass
+    
     window_thread = threading.Thread(target=main) # 锁屏窗口线程
     check_thread = threading.Thread(target=check_lock) # 检查线程
     window_thread.start()
