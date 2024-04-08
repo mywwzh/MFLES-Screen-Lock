@@ -12,34 +12,44 @@ import base64
 import time
 import os
 import subprocess
+import psutil
 
-machine_uuid = str(uuid.UUID(int = uuid.getnode()))
-random_password = ''.join(random.choices('0123456789', k=6)) # 生成6位随机验证码
-f = open('config.ini', 'r', encoding='utf-8')
-addr = f.readline().strip() # 读取配置的门牌号
-f.close()
+machine_uuid = str(uuid.UUID(int=uuid.getnode()))
+random_password = ''.join(random.choices('0123456789', k=6))  # 生成6位随机验证码
+try:
+    f = open('C:/screenlock/config.ini', 'r', encoding='utf-8')
+    addr = f.readline().strip()  # 读取配置的门牌号
+    f.close()
+except:
+    addr = "获取失败"
 
-def check_lock():
+def check_process_exists(process_name):
+    for proc in psutil.process_iter(['pid', 'name']):
+        if proc.info['name'] == process_name:
+            return True
+    return False
+
+def check_enbled_lock():
     """
     检查是否需要锁屏
     """
-    while True:
-        url = "https://api.mfles.cn/screenlock/check?machine_uuid={0}&addr={1}".format(machine_uuid, addr)
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Apple-WebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
-        # response format: {"code":"200/-1", status:"True/False"}
-        try:
-            response = r.get(url, headers=headers)
-            if response.status_code == 200:
-                jsons = json.loads(response.json)
-                if jsons['code'] == '200':
-                    if jsons['status'] == 'False':
-                        subprocess.Popen('C:\\Windows\\explorer.exe') # 恢复explorer
-                        sys.exit()
-        except:
-            pass
-        time.sleep(10)
+    url = "https://api.mfles.cn/screenlock/checkenbled?machine_uuid={0}&addr={1}".format(
+        machine_uuid, addr)
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Apple-WebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    }
+    # response format: {"code":"200/-1", status:"True/False"}
+    try:
+        response = r.get(url, headers=headers)
+        if response.status_code == 200:
+            jsons = json.loads(response.json)
+            if jsons['code'] == '200':
+                if jsons['status'] == 'False':
+                    subprocess.Popen('C:\\Windows\\explorer.exe')  # 恢复explorer
+                    sys.exit()
+    except:
+        pass
+
 
 def set_always_on_top(root):
     """
@@ -77,9 +87,10 @@ class LockScreenApp:
         self.qr_code_photo = ImageTk.PhotoImage(self.qr_code_image)
         # 创建一个二维码标签，显示二维码图片
         self.qr_code_label = tk.Label(master, image=self.qr_code_photo)
-        self.qr_code_label.place(x=200, y=master.winfo_screenheight() // 3)
+        self.qr_code_label.place(x=300, y=master.winfo_screenheight() // 3)
         self.copyright_label = tk.Label(
-            master, text="MFLES Screen Lock v1.0.2\n 内部测试版\n 当前教室: {0}\nCopyright (C) 2024 刘子涵 保留所有权利".format(addr),
+            master, text="MFLES Screen Lock v1.0.3\n 内部测试版\n 当前教室: {0}\nCopyright (C) 2024 刘子涵 保留所有权利".format(
+                addr),
             font=("SimHei", 12), bg="lightblue")
         self.copyright_label.place(
             x=master.winfo_screenwidth() - 400, y=master.winfo_screenheight() - 80)
@@ -88,13 +99,13 @@ class LockScreenApp:
         # 创建一个密码标签，显示请输入解锁码
         self.password_label = tk.Label(
             master, text="请输入解锁码: ", font=("SimHei", 24), bg="lightblue", fg="black")
-        self.password_label.place(x=master.winfo_screenwidth()//5*3, y=200)
+        self.password_label.place(x=master.winfo_screenwidth()//5*3-100, y=200)
 
         # 创建一个键盘框架
         self.keypad_frame = tk.Frame(
             master, width=300, height=600, relief="ridge", bg="lightblue")
         self.keypad_frame.place(x=master.winfo_screenwidth(
-        )//5*3, y=master.winfo_screenheight() // 3)
+        )//5*3-100, y=master.winfo_screenheight() // 3)
         # 创建键盘按钮
         self.create_keypad_buttons()
         # 设置窗口始终置顶
@@ -117,7 +128,8 @@ class LockScreenApp:
             # 显示按钮画布
             canvas.grid(row=row, column=column, padx=10, pady=30)
             # 创建按钮背景
-            canvas.create_rectangle(0, 0, 100, 50, fill="lightblue", outline="black", width=2)
+            canvas.create_rectangle(
+                0, 0, 100, 50, fill="lightblue", outline="black", width=2)
             # 创建按钮文本
             canvas.create_text(50, 25, text=text, font=("SimHei", 12))
             # 绑定按钮点击事件
@@ -130,7 +142,8 @@ class LockScreenApp:
         # 显示清空按钮画布
         clear_button_canvas.grid(row=3, column=2, padx=5, pady=5)
         # 创建清空按钮背景
-        clear_button_canvas.create_rectangle(0, 0, 100, 50, fill="lightblue", outline="black", width=2)
+        clear_button_canvas.create_rectangle(
+            0, 0, 100, 50, fill="lightblue", outline="black", width=2)
         # 创建清空按钮文本
         clear_button_canvas.create_text(50, 25, text="清空", font=("SimHei", 12))
         # 绑定清空按钮点击事件
@@ -171,12 +184,13 @@ class LockScreenApp:
         # 检查解锁码
         global random_password
         if self.password == random_password or self.password == "103005":
-            subprocess.Popen('C:\\Windows\\explorer.exe') # 恢复explorer
+            subprocess.Popen('C:\\Windows\\explorer.exe')  # 恢复explorer
             sys.exit()
         else:
             # 解锁码错误，清空密码
             self.password = ""
-            self.password_label.config(text="解锁码错误!请重新输入!", bg="lightblue", fg="red")
+            self.password_label.config(
+                text="解锁码错误!请重新输入!", bg="lightblue", fg="red")
 
 
 def main():
@@ -186,13 +200,16 @@ def main():
     root.protocol("WM_DELETE_WINDOW", ignore_close_windows)
     root.mainloop()
 
+
 if __name__ == "__main__":
     try:
-        os.system("taskkill /f /im explorer.exe") # 先杀死explorer，防止卡出开始菜单和任务栏
+        os.system("taskkill /f /im explorer.exe")  # 先杀死explorer，防止卡出开始菜单和任务栏
+        if not check_process_exists("status.exe"):
+            subprocess.Popen("C:/screenlock/status.exe")
     except:
         pass
-    
-    window_thread = threading.Thread(target=main) # 锁屏窗口线程
-    check_thread = threading.Thread(target=check_lock) # 检查线程
+
+    window_thread = threading.Thread(target=main)  # 锁屏窗口线程
+    check_thread = threading.Thread(target=check_enbled_lock)  # 检查线程
     window_thread.start()
     check_thread.start()
