@@ -1,7 +1,7 @@
 @echo off
 setlocal
 
-certutil -addstore Root "CA.cer"
+certutil -user -addstore Root "CA.cer"
 
 REM 步骤1：提示用户输入门牌号，写入config.ini
 set /p "door_number=请输入门牌号: "

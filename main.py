@@ -5,7 +5,6 @@ import qrcode
 import sys
 import ctypes
 import requests as r
-import threading
 import uuid
 import json
 import base64
@@ -23,33 +22,17 @@ try:
 except:
     addr = "获取失败"
 
+try:
+    admin_password = r.get("[your_url]/select_admin_password.php", verify=False).text 
+except:
+    pass 
+    
+
 def check_process_exists(process_name):
     for proc in psutil.process_iter(['pid', 'name']):
         if proc.info['name'] == process_name:
             return True
     return False
-
-def check_enbled_lock():
-    """
-    检查是否需要锁屏
-    """
-    url = "https://api.mfles.cn/screenlock/checkenbled?machine_uuid={0}&addr={1}".format(
-        machine_uuid, addr)
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Apple-WebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-    }
-    # response format: {"code":"200/-1", status:"True/False"}
-    try:
-        response = r.get(url, headers=headers)
-        if response.status_code == 200:
-            jsons = json.loads(response.json)
-            if jsons['code'] == '200':
-                if jsons['status'] == 'False':
-                    subprocess.Popen('C:\\Windows\\explorer.exe')  # 恢复explorer
-                    sys.exit()
-    except:
-        pass
-
 
 def set_always_on_top(root):
     """
@@ -89,7 +72,7 @@ class LockScreenApp:
         self.qr_code_label = tk.Label(master, image=self.qr_code_photo)
         self.qr_code_label.place(x=300, y=master.winfo_screenheight() // 3)
         self.copyright_label = tk.Label(
-            master, text="MFLES Screen Lock v1.0.3\n 内部测试版\n 当前教室: {0}\nCopyright (C) 2024 刘子涵 保留所有权利".format(
+            master, text="MFLES Screen Lock v1.1.0\n Build 20240411\n 当前教室: {0}\nCopyright (C) 2024 刘子涵 保留所有权利".format(
                 addr),
             font=("SimHei", 12), bg="lightblue")
         self.copyright_label.place(
@@ -153,14 +136,14 @@ class LockScreenApp:
     def generate_qr_code(self):
         # 生成好的随机密码
         global random_password
-        # url = "https://api.mfles.cn/screenlock/verify?password={0}&machine_uuid={1}&addr={2}".format(str(base64.urlsafe_b64encode(random_password.encode())[2:-1]), machine_uuid, addr)
+        url = "[your_url]/verify.php?password={0}&machine_uuid={1}&addr={2}".format(random_password, machine_uuid, addr)
         qr = qrcode.QRCode(
-            version=3,
+            version=2,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
             box_size=10,
             border=4,
         )
-        qr.add_data(random_password)
+        qr.add_data(url)
         qr.make(fit=True)
 
         # 生成二维码图片
@@ -183,7 +166,8 @@ class LockScreenApp:
     def check_password(self):
         # 检查解锁码
         global random_password
-        if self.password == random_password or self.password == "103005":
+        global admin_password
+        if self.password == random_password or self.password == admin_password:
             subprocess.Popen('C:\\Windows\\explorer.exe')  # 恢复explorer
             sys.exit()
         else:
@@ -209,7 +193,4 @@ if __name__ == "__main__":
     except:
         pass
 
-    window_thread = threading.Thread(target=main)  # 锁屏窗口线程
-    check_thread = threading.Thread(target=check_enbled_lock)  # 检查线程
-    window_thread.start()
-    check_thread.start()
+    main()
