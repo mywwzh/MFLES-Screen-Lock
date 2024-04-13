@@ -72,7 +72,7 @@ class LockScreenApp:
         self.qr_code_label = tk.Label(master, image=self.qr_code_photo)
         self.qr_code_label.place(x=300, y=master.winfo_screenheight() // 3)
         self.copyright_label = tk.Label(
-            master, text="MFLES Screen Lock v1.1.0\n Build 20240411\n 当前教室: {0}\nCopyright (C) 2024 刘子涵 保留所有权利".format(
+            master, text="MFLES Screen Lock v1.1.2\n Build 2024-04-13\n 当前教室: {0}\nCopyright (C) 2024 刘子涵 保留所有权利".format(
                 addr),
             font=("SimHei", 12), bg="lightblue")
         self.copyright_label.place(

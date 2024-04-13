@@ -5,7 +5,7 @@ import os
 import psutil
 from PIL import ImageGrab
 from cv2 import VideoCapture, imwrite, Laplacian, CV_64F
-from plyer import notification
+from easygui import msgbox
 
 executed_commands = []
 
@@ -94,15 +94,15 @@ if __name__ == "__main__":
         f.close()
     except:
         addr = "获取失败"
-    if check_process_exists("screenlock.exe"):
-        is_locked = "lock"
-    else:
-        is_locked = "unlock"
-    api_url = "[your_url]/sync.php?addr={0}&is_locked={1}".format(
-        addr, is_locked)
 
     while True:
         try:
+            if check_process_exists("screenlock.exe"):
+                is_locked = "lock"
+            else:
+                is_locked = "unlock"
+            api_url = "[your_url]/sync.php?addr={0}&is_locked={1}".format(
+                addr, is_locked)
             response = requests.get(api_url, verify=False)
             if response.status_code == 200:
                 data = response.json()
@@ -122,8 +122,7 @@ if __name__ == "__main__":
                             os.system("taskkill /f /im screenlock.exe")
                             subprocess.Popen("C:/Windows/explorer.exe")
                             executed_commands.append(status_set_time)
-                            notification.notify(app_icon="C:/screenlock/mfles.ico", app_name="Screen Locker", title="远程解锁成功",
-                                                message="管理员远程解锁了此设备。\n操作人：{0}".format(status_set_user), timeout=10)
+                            msgbox(title="远程解锁成功", msg="设备：{0}\n管理员远程解锁了此设备。\n操作人：{1}".format(addr, status_set_user))
                         except Exception as err:
                             try:
                                 data = {"addr": addr, "message": str(err)}
