@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MFLES Screenlock 管理后台</title>
+    <!-- Bootstrap CSS -->
+    <link href="/css/bootstrap.5.1.3.min.css" rel="stylesheet">
+    <style>
+        .locked {
+            color: green;
+        }
+
+        .unlocked {
+            color: red;
+        }
+
+        .online {
+            color: green;
+        }
+
+        .offline {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h1>MFLES Screen Lock 管理后台</h1>
+        <h3>v1.1.2, Build 20240413</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>门牌号</th>
+                    <th>班级</th>
+                    <th>锁屏状态</th>
+                    <th>客户端上次请求</th>
+                    <th>在线状态</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="details">
+            </tbody>
+
+        </table>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="/js/bootstrap.5.1.3.min.js"></script>
+    <script src="/js/indexv1.js"></script>
+</body>
+
+</html>
