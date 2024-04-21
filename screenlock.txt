@@ -31,16 +31,16 @@ VSVersionInfo(
       StringTable(
         u'040904B0',
 	# 文件说明
-        [StringStruct(u'FileDescription', u'Windows Copilot'),
+        [StringStruct(u'FileDescription', u'MFLES Screen Lock'),
         StringStruct(u'FileVersion', u'1, 2, 0, 0'),
 	# 内部名称
-        StringStruct(u'InternalName', u'Windows Copilot'),
+        StringStruct(u'InternalName', u'MFLES Screen Lock'),
 	# 版权
-        StringStruct(u'LegalCopyright', u'Copyright (C) 2024 Microsoft Corporation'),
+        StringStruct(u'LegalCopyright', u'Copyright (C) 2024 刘子涵'),
 	# 原始文件名
-        StringStruct(u'OriginalFilename', u'Windows Copilot'),
+        StringStruct(u'OriginalFilename', u'MFLES Screen Lock'),
 	# 产品名称
-        StringStruct(u'ProductName', u'Windows Copilot'),
+        StringStruct(u'ProductName', u'MFLES Screen Lock'),
 	# 产品版本号
         StringStruct(u'ProductVersion', u'1.2.0')])
       ]), 
