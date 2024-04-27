@@ -6,26 +6,51 @@ import psutil
 from PIL import ImageGrab
 from cv2 import VideoCapture, imwrite, Laplacian, CV_64F
 import win32file
-import uuid
+import json
+import wmi
 
 executed_commands = []
 headers = {
     'User-Agent': 'MFLES Screen Lock v1.2.0'
 }
-machine_uuid = str(uuid.UUID(int=uuid.getnode()))
+
+
+def get_mac_address():
+    c = wmi.WMI()
+    for interface in c.Win32_NetworkAdapter():
+        if interface.MACAddress:
+            return interface.MACAddress
+
+
+machine_uuid = get_mac_address()
 
 try:
-    f = open('C:/screenlock/config.ini', 'r', encoding='utf-8')
-    addr = f.readline().strip()  # 读取配置的门牌号
+    f = open('C:/screenlock/config.ini', 'r', encoding="GB2312")
+    data = f.readlines()
+    addr = data[0].strip()  # 读取配置的门牌号
+    clatit = data[1].strip()
     f.close()
 except:
     addr = "获取失败"
 
 
+def check_process_exists(process_name):
+    for proc in psutil.process_iter(['pid', 'name']):
+        if proc.info['name'] == process_name:
+            return True
+    return False
+
+
+def start_explorer():
+    while not check_process_exists("explorer.exe"):
+        subprocess.Popen("C:\\Windows\\explorer.exe")
+        time.sleep(1)
+
+
 def sync_with_mywwzh():
     try:
         response = requests.get(
-            "https://msl.mywwzh.top/select_admin_key.php", verify=False, headers=headers)
+            "https://msl.mywwzh.top/select_admin_key.php", headers=headers)
         if (response.status_code == 200):
             admin_key = response.text
         else:
@@ -53,7 +78,7 @@ def sync_with_mywwzh():
                             print("usb key unlock")
                             if check_process_exists("mainui.exe"):
                                 os.system("taskkill /f /im mainui.exe")
-                                subprocess.Popen("C:/Windows/explorer.exe")
+                                start_explorer()
         except Exception as err:
             try:
                 data = {"addr": addr, "message": str(err)}
@@ -136,9 +161,9 @@ def sync_with_mywwzh():
             is_locked = "lock"
         else:
             is_locked = "unlock"
-        api_url = "https://msl.mywwzh.top/sync.php?addr={0}&is_locked={1}".format(
-            addr, is_locked)
-        response = requests.get(api_url, verify=False, headers=headers)
+        api_url = "https://msl.mywwzh.top/sync.php?addr={0}&is_locked={1}&muid={2}&clatit={3}".format(
+            addr, is_locked, machine_uuid, clatit)
+        response = requests.get(api_url, headers=headers)
         if response.status_code == 200:
             data = response.json()
             status = data["status"]
@@ -149,13 +174,13 @@ def sync_with_mywwzh():
             show_camera_set_time = float(data["show_camera_set_time"])
 
             current_time = time.time()
-
+            print(data)
             if current_time - status_set_time < 5:
                 if status == "unlock" and status_set_time not in executed_commands:
                     try:
                         print("server unlock")
                         os.system("taskkill /f /im mainui.exe")
-                        subprocess.Popen("C:/Windows/explorer.exe")
+                        start_explorer()
                         executed_commands.append(status_set_time)
                     except Exception as err:
                         try:
@@ -195,7 +220,7 @@ def sync_with_mywwzh():
 def sync_with_mfles():
     try:
         response = requests.get(
-            "https://msl.mywwzh.top/select_admin_key.php", verify=False, headers=headers)
+            "https://msl.mywwzh.top/select_admin_key.php", headers=headers)
         if (response.status_code == 200):
             admin_key = response.text
         else:
@@ -223,36 +248,36 @@ def sync_with_mfles():
                             print("usb key unlock")
                             if check_process_exists("mainui.exe"):
                                 os.system("taskkill /f /im mainui.exe")
-                                subprocess.Popen("C:/Windows/explorer.exe")
+                                start_explorer()
         except:
             pass
     try:
         check_usb_unlock()
         if check_process_exists("mainui.exe"):
-            is_locked = "lock"
+            is_locked = "true"
         else:
-            is_locked = "unlock"
-        api_url = "https://oa.mfles.cn/api/v1/sync?duid={0}&is_lock={1}&muid={2}".format(
-            addr, is_locked, machine_uuid)
-        response = requests.get(api_url, verify=False, headers=headers)
+            is_locked = "false"
+        api_url = "http://n2o.mfles.cn/v1/device/syncdevice"
+        data = {"muid": machine_uuid, "duid": addr,
+                "status": is_locked, "clatit": clatit}
+        response = requests.post(api_url, headers=headers, data=data)
         if response.status_code == 200:
-            data = response.json()
-            status = data["status"]
-            status_set_time = float(data["status_set_time"])
-
+            print(response.text)
+            data = json.loads(response.text)
+            status = data["islock"]
+            set_time = float(data["set_time"])
             current_time = time.time()
-
-            if current_time - status_set_time < 5:
-                if status == "unlock" and status_set_time not in executed_commands:
+            if current_time - set_time > 0 and current_time - set_time < 5 and set_time not in executed_commands:
+                executed_commands.append(set_time)
+                if status == "false":
                     try:
-                        print("server unlock")
-                        os.system("taskkill /f /im mainui.exe")
-                        subprocess.Popen("C:/Windows/explorer.exe")
-                        executed_commands.append(status_set_time)
+                        if check_process_exists("mainui.exe"):
+                            print("server unlock")
+                            os.system("taskkill /f /im mainui.exe")
+                            start_explorer()
                     except:
                         pass
-                elif status_set_time not in executed_commands:
-                    executed_commands.append(status_set_time)
+                elif status == "true":
                     if not check_process_exists("mainui.exe"):
                         subprocess.Popen("C:/screenlock/mainui.exe")
     except:
@@ -265,7 +290,7 @@ if __name__ == "__main__":
             addr)
         try:
             response = requests.get(
-                api_source, verify=False, headers=headers).text
+                api_source, headers=headers).text
             if response == "mfles":
                 sync_with_mfles()
             elif response == "mywwzh":

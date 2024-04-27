@@ -3,23 +3,36 @@ setlocal
 
 echo Compiling MFLES Screen Lock v1.2.0...
 
-timeout 5
+timeout /nobreak 5
 
+echo install requiements...
+
+pip install -r requiements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple 
+
+timeout /nobreak 2
 echo Compiling mainui.exe...
-pyinstaller -w main.py --version-file main.txt -i Copilot.ico -n mainui
+timeout /nobreak 2
+pyinstaller -w main.py --version-file main.txt -i Copilot.ico -n mainui --noconfirm
 echo mainui.py compiled successfully!
 
-timeout 2
+timeout /nobreak 2
 echo Compiling sync.exe...
-pyinstaller -w status.py --version-file status.txt -i Teams.ico -n sync
+timeout /nobreak 2
+pyinstaller -w status.py --version-file status.txt -i Teams.ico -n sync --noconfirm
 echo sync.py compiled successfully!
 
-timeout 2
+timeout /nobreak 2
 echo Compiling mslkp.exe...
-pyinstaller -w mslkp.py --version-file mslkp.txt -i WindowsBackup.ico -n mslkp
+timeout /nobreak 2
+pyinstaller -w mslkp.py --version-file mslkp.txt -i WindowsBackup.ico -n mslkp --noconfirm
 echo mslkp.exe compiled successfully!
 
-timeout 2
+timeout /nobreak 2
 echo Compiling screenlock.exe...
-pyinstaller -w screenlock.py --version-file screenlock.txt -i mfles.ico -n screenlock
+timeout /nobreak 2
+pyinstaller -w screenlock.py --version-file screenlock.txt -i mfles.ico -n screenlock --noconfirm
 echo screenlock.exe compiled successfully!
+
+echo compile successfully!!!
+
+pause

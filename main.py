@@ -3,7 +3,7 @@ from PIL import ImageTk
 import qrcode
 import ctypes
 import requests as r
-import uuid
+import wmi
 import os
 import subprocess
 import psutil
@@ -11,10 +11,21 @@ import psutil
 headers = {
     'User-Agent': 'MFLES Screen Lock v1.2.0'
 }
-machine_uuid = str(uuid.UUID(int=uuid.getnode()))
+
+
+def get_mac_address():
+    c = wmi.WMI()
+    for interface in c.Win32_NetworkAdapter():
+        if interface.MACAddress:
+            return interface.MACAddress
+
+
+machine_uuid = get_mac_address()
 try:
-    f = open('C:/screenlock/config.ini', 'r', encoding='utf-8')
-    addr = f.readline().strip()  # 读取配置的门牌号
+    f = open('C:/screenlock/config.ini', 'r', encoding="GB2312")
+    data = f.readlines()
+    addr = data[0].strip()  # 读取配置的门牌号
+    clatit = data[1].strip()
     f.close()
 except:
     addr = "获取失败"
@@ -99,7 +110,7 @@ class LockScreenApp:
 
     def generate_qr_code(self):
         if source == "mfles":
-            url = "https://oa.mfles.cn/api/v1/verify?muid={0}&duid={1}".format(
+            url = "http://order.mfles.cn/device?muid={0}&duid={1}".format(
                 machine_uuid, addr)
         elif source == "mywwzh":
             url = "https://msl.mywwzh.top/verifyv2.php?machine_uuid={0}&addr={1}".format(
