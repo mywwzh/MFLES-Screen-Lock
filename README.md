@@ -23,6 +23,12 @@
 4. **ctypes库**：应用程序使用ctypes库来调用Windows API，使窗口始终置顶。
 5. **threading库**：应用程序使用threading库来创建多线程，一个线程用于显示锁屏窗口，另一个线程用于检查是否需要锁屏。
 
+## 截图
+
+![image](https://github.com/user-attachments/assets/d9b5846b-78f3-4450-8805-7ec10782adf2)
+
+![image](https://github.com/user-attachments/assets/0dac1448-b811-4a84-ace3-e069be097d6e)
+
 ## 使用方法
 
 ### 安装依赖
