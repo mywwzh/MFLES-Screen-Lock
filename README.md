@@ -27,7 +27,8 @@
 
 ![image](https://github.com/user-attachments/assets/d9b5846b-78f3-4450-8805-7ec10782adf2)
 
-![image](https://github.com/user-attachments/assets/0dac1448-b811-4a84-ace3-e069be097d6e)
+![image](https://github.com/user-attachments/assets/dd60a64b-8a0f-4faa-9a1c-72156a71d06c)
+
 
 ## 使用方法
 
